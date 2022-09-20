@@ -18,7 +18,17 @@ namespace Faker
             return (T) Create(typeof(T));
         }
 
-        public static void InitDictionary(Dictionary<string, ValueGenerator> generators)
+        private Dictionary<string, ValueGenerator> generators;
+
+        private int countTypes;
+
+        public Faker()
+        {
+            generators = new Dictionary<string, ValueGenerator>();
+            InitDictionary();
+        }
+
+        private void InitDictionary()
         {
             generators.Add(typeof(bool).Name, new BoolGenerator());
             generators.Add(typeof(byte).Name, new ByteGenerator());
@@ -33,49 +43,33 @@ namespace Faker
             generators.Add(typeof(string).Name, new StringGenerator());
         }
 
-        private static object GetDefaultValue(Type type)
-        {
-            if (type.IsValueType)
-                return Activator.CreateInstance(type);
-            return null;
-        }
-
-        public void GenerateProperties(Type type, Object obj, Dictionary<string, ValueGenerator> generators)
+        private void GenerateProperties(Type type, Object obj)
         {
             var properties = type.GetProperties();
             for (int i = 0; i < properties.Length; i++)
-            {
-                PropertyInfo property = type.GetProperty(properties[i].Name);
-                if (property != null)
-                    property.SetValue(obj, Create(property.PropertyType));
-            }
+                properties[i].SetValue(obj, Create(properties[i].PropertyType));
         }
 
-        public void GenerateFields(Type type, Object obj, Dictionary<string, ValueGenerator> generators)
+        private void GenerateFields(Type type, Object obj)
         {
             var fields = type.GetFields();
             for (int i = 0; i < fields.Length; i++)
-            {
-                FieldInfo field = type.GetField(fields[i].Name);
-                if (field != null)
-                    field.SetValue(obj, Create(field.FieldType));
-            }
-            //брать из тайпа все
+                fields[i].SetValue(obj, Create(fields[i].FieldType));
         }
 
-        public object GenerateConstructors(Type type, Dictionary<string, ValueGenerator> generators)
+        private object GenerateConstructors(Type type)
         {
             var constructors =
                 type.GetConstructors(BindingFlags.Instance | BindingFlags.Public)
                     .OrderByDescending(x => x.GetParameters().Length).ToList();
             if (constructors.Count == 0 && type.BaseType != typeof(ValueType))
                 throw new Exception("Невозможно создать объект с приватным конструктором.");
-            for (int j = 0; j < constructors.Count; j++)
+            for (int i = 0; i < constructors.Count; i++)
             {
                 List<object> parameterValues = new List<object>();
-                var parameters = constructors[j].GetParameters();
-                for (int i = 0; i < parameters.Length; i++)
-                    parameterValues.Add(Create(parameters[i].ParameterType));
+                var parameters = constructors[i].GetParameters();
+                for (int j = 0; j < parameters.Length; j++)
+                    parameterValues.Add(Create(parameters[j].ParameterType));
                 try
                 {
                     var obj = Activator.CreateInstance(type, args: parameterValues.ToArray());
@@ -89,20 +83,29 @@ namespace Faker
             return Activator.CreateInstance(type);
         }
 
+
         private object Create(Type type)
         {
-            Dictionary<string, ValueGenerator> generators = new Dictionary<string, ValueGenerator>();
-            InitDictionary(generators);
-
             if (generators.ContainsKey(type.Name))
             {
                 var valueGenerator = generators[type.Name];
                 return valueGenerator.Random(type);
             }
 
-            var obj = GenerateConstructors(type, generators);
-            GenerateProperties(type, obj, generators);
-            GenerateFields(type, obj, generators);
+            if (type.IsValueType)
+                return Activator.CreateInstance(type);
+
+            countTypes++;
+            if (countTypes > 25)
+            {
+                countTypes--;
+                return null;
+            }
+
+            var obj = GenerateConstructors(type);
+            GenerateProperties(type, obj);
+            GenerateFields(type, obj);
+            countTypes--;
             return obj;
         }
     }

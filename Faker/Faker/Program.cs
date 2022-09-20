@@ -9,36 +9,38 @@ using Faker.Generators;
 
 namespace Faker
 {
-   public struct Point
+    public struct Point
     {
         public int x;
         public int y;
+        private int ss;
+        private int sss;
     }
+
+    public class A
+    {
+        public B b { get; set; }
+        public B b1 { get; set; }
+        public B b2 { get; set; }
+        public B b3 { get; set; }
+        public B b4 { get; set; }
+        public B b5 { get; set; }
+    }
+
+    public class B
+    {
+        public C c { get; set; }
+    }
+
+    public class C
+    {
+        public A a { get; set; }
+    }
+
     public class User
     {
-        public List<User> _list;
-
-        public string fileName { get; set; }
-
-        public List<List<Point>> lj;
-        private List<List<int>> test1;
-        private List<Point> test2;
-        private int test3;
-        
-        public User(List<List<int>> yeyeyeyeyey,List<Point> points,int a)
-        {
-            test1 = yeyeyeyeyey;
-            test2 = points;
-            test3 = a;
-        }
-        //private int fileSize;
-
-        // public int Age { get; set; }  
-        // public string Name { get; set; }
-        // public byte weight;
-        // public char favoriteChar;
-        // public char favoriChar;
-        // public DateTime DateTime;
+        public int b;
+        public List<List<int>> l;
     }
 
     internal class Program
@@ -46,12 +48,12 @@ namespace Faker
         public static void Main(string[] args)
         {
             Faker faker = new Faker();
-            var a = faker.Create<List<List<User>>>();
-            // var a = faker.Create<int>();
-           // User user = faker.Create<User>();
-         //   User s = new User(0);
-         //ValueGenerator v = new ListGenerator();
-        // v.Random(typeof(List<User>));
+            var a = faker.Create<A>();
+            var a6 = faker.Create<uint>();
+            User user = faker.Create<User>();
+            //   User s = new User(0);
+            //ValueGenerator v = new ListGenerator();
+            // v.Random(typeof(List<User>));
         }
     }
 }

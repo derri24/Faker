@@ -2,7 +2,7 @@
 
 namespace Faker.Generators
 {
-    public class StringGenerator:ValueGenerator
+    public class StringGenerator : ValueGenerator
     {
         public override object Random(Type type)
         {
@@ -12,7 +12,5 @@ namespace Faker.Generators
                 result += str[ObjRandom.Next(0, str.Length)];
             return result;
         }
-
     }
-    
 }

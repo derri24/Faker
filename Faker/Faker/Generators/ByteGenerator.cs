@@ -6,7 +6,7 @@ namespace Faker.Generators
     {
         public override object Random(Type type)
         {
-            return (byte) ObjRandom.Next(-1, 256);
+            return (byte) ObjRandom.Next(1, 256);
         }
     }
 }
